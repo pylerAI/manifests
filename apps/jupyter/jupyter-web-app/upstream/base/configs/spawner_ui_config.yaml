@@ -17,35 +17,20 @@
 spawnerFormDefaults:
   image:
     # The container Image for the user's Jupyter Notebook
-    value: kubeflownotebookswg/jupyter-scipy:v1.6.0-rc.1
+    value: asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/jupyter-pytorch-full:v1.0
     # The list of available standard container Images
     options:
-    - kubeflownotebookswg/jupyter-scipy:v1.6.0-rc.1
-    - kubeflownotebookswg/jupyter-pytorch-full:v1.6.0-rc.1
-    - kubeflownotebookswg/jupyter-pytorch-cuda-full:v1.6.0-rc.1
-    - kubeflownotebookswg/jupyter-tensorflow-full:v1.6.0-rc.1
-    - kubeflownotebookswg/jupyter-tensorflow-cuda-full:v1.6.0-rc.1
+      - asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/jupyter-pytorch-full:v1.0
+      - asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/jupyter-pytorch-cuda-full:v1.0
   imageGroupOne:
     # The container Image for the user's Group One Server
     # The annotation `notebooks.kubeflow.org/http-rewrite-uri: /`
     # is applied to notebook in this group, configuring
     # the Istio rewrite for containers that host their web UI at `/`
-    value: kubeflownotebookswg/codeserver-python:v1.6.0-rc.1
+    value: asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/codeserver-python:v1.0
     # The list of available standard container Images
     options:
-    - kubeflownotebookswg/codeserver-python:v1.6.0-rc.1
-  imageGroupTwo:
-    # The container Image for the user's Group Two Server
-    # The annotation `notebooks.kubeflow.org/http-rewrite-uri: /`
-    # is applied to notebook in this group, configuring
-    # the Istio rewrite for containers that host their web UI at `/`
-    # The annotation `notebooks.kubeflow.org/http-headers-request-set`
-    # is applied to notebook in this group, configuring Istio
-    # to add the `X-RStudio-Root-Path` header to requests
-    value: kubeflownotebookswg/rstudio-tidyverse:v1.6.0-rc.1
-    # The list of available standard container Images
-    options:
-    - kubeflownotebookswg/rstudio-tidyverse:v1.6.0-rc.1
+      - asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/codeserver-python:v1.0
   # If true, hide registry and/or tag name in the image selection dropdown
   hideRegistry: true
   hideTag: false
@@ -58,17 +43,17 @@ spawnerFormDefaults:
     readOnly: false
   cpu:
     # CPU for user's Notebook
-    value: '0.5'
+    value: "2"
     # Factor by with to multiply request to calculate limit
     # if no limit is set, to disable set "none"
-    limitFactor: "1.2"
+    limitFactor: "4"
     readOnly: false
   memory:
     # Memory for user's Notebook
-    value: 1.0Gi
+    value: 4Gi
     # Factor by with to multiply request to calculate limit
     # if no limit is set, to disable set "none"
-    limitFactor: "1.2"
+    limitFactor: "8"
     readOnly: false
   environment:
     value: {}
@@ -77,16 +62,16 @@ spawnerFormDefaults:
     # Workspace Volume to be attached to user's Notebook
     # If you don't want a workspace volume then delete the 'value' key
     value:
-      mount: /home/jovyan
+      mount: /home/pyler
       newPvc:
         metadata:
-          name: '{notebook-name}-workspace'
+          name: "{notebook-name}-workspace"
         spec:
           resources:
             requests:
               storage: 10Gi
           accessModes:
-          - ReadWriteOnce
+            - ReadWriteOnce
     readOnly: false
   dataVolumes:
     # List of additional Data Volumes to be attached to the user's Notebook
@@ -115,17 +100,15 @@ spawnerFormDefaults:
       num: "none"
       # Determines what the UI will show and send to the backend
       vendors:
-      - limitsKey: "nvidia.com/gpu"
-        uiName: "NVIDIA"
-      - limitsKey: "amd.com/gpu"
-        uiName: "AMD"
+        - limitsKey: "nvidia.com/gpu"
+          uiName: "NVIDIA"
       # Values: "" or a `limits-key` from the vendors list
       vendor: ""
     readOnly: false
   affinityConfig:
     # If readonly, the default value will be the only option
     # value is a list of `configKey`s that we want to be selected by default
-    value: ""
+    value: false
     # The list of available affinity configs
     options: []
     #options:
@@ -154,7 +137,7 @@ spawnerFormDefaults:
   tolerationGroup:
     # The default `groupKey` from the options list
     # If readonly, the default value will be the only option
-    value: ""
+    value: false
     # The list of available tolerationGroup configs
     options: []
     #options:
@@ -171,7 +154,7 @@ spawnerFormDefaults:
     #        effect: "NoSchedule"
     readOnly: false
   shm:
-    value: true
+    value: false
     readOnly: false
   configurations:
     # List of labels to be selected, these are the labels from PodDefaults
