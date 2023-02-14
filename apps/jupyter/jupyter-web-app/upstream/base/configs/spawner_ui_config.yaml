@@ -27,19 +27,19 @@ spawnerFormDefaults:
     # The annotation `notebooks.kubeflow.org/http-rewrite-uri: /`
     # is applied to notebook in this group, configuring
     # the Istio rewrite for containers that host their web UI at `/`
-    value: asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/codeserver-python:v1.0
+    value: asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/pyler-codeserver-python:v1.1
     # The list of available standard container Images
     options:
-      - asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/codeserver-python:v1.0
+      - asia-northeast3-docker.pkg.dev/pyler-mlops/pyler-kubeflow-notebooks/pyler-codeserver-python:v1.1
   # If true, hide registry and/or tag name in the image selection dropdown
   hideRegistry: true
   hideTag: false
-  allowCustomImage: true
+  allowCustomImage: false
   # If true, users can input custom images
   # If false, users can only select from the images in this config
   imagePullPolicy:
     # Supported values: Always, IfNotPresent, Never
-    value: IfNotPresent
+    value: Always
     readOnly: false
   cpu:
     # CPU for user's Notebook
@@ -62,7 +62,7 @@ spawnerFormDefaults:
     # Workspace Volume to be attached to user's Notebook
     # If you don't want a workspace volume then delete the 'value' key
     value:
-      mount: /home/pyler
+      mount: /home/jovyan
       newPvc:
         metadata:
           name: "{notebook-name}-workspace"
@@ -75,7 +75,16 @@ spawnerFormDefaults:
     readOnly: false
   dataVolumes:
     # List of additional Data Volumes to be attached to the user's Notebook
-    value: []
+    value:
+      - mount: /datasets
+        existingSource:
+          persistentVolumeClaim:
+            claimName: datasets
+            readOnly: true
+      - mount: /artifacts
+        existingSource:
+          persistentVolumeClaim:
+            claimName: artifacts
     # For example, a list with 2 Data Volumes:
     # value:
     #   - mount: /home/jovyan/datavol-1
@@ -97,7 +106,7 @@ spawnerFormDefaults:
     # Number of GPUs to be assigned to the Notebook Container
     value:
       # values: "none", "1", "2", "4", "8"
-      num: "none"
+      num: ""
       # Determines what the UI will show and send to the backend
       vendors:
         - limitsKey: "nvidia.com/gpu"
@@ -110,7 +119,18 @@ spawnerFormDefaults:
     # value is a list of `configKey`s that we want to be selected by default
     value: false
     # The list of available affinity configs
-    options: []
+    options:
+      - configKey: "GPU Model"
+        displayName: "GPU: RTX 3090"
+        affinity:
+          nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: "gpu_model"
+                      operator: "In"
+                      values:
+                        - "3090"
     #options:
     #  - configKey: "exclusive__n1-standard-2"
     #    displayName: "Exclusive: n1-standard-2"
@@ -133,7 +153,7 @@ spawnerFormDefaults:
     #                  operator: "Exists"
     #            namespaces: []
     #            topologyKey: "kubernetes.io/hostname"
-    #readOnly: false
+    readOnly: false
   tolerationGroup:
     # The default `groupKey` from the options list
     # If readonly, the default value will be the only option
@@ -154,7 +174,7 @@ spawnerFormDefaults:
     #        effect: "NoSchedule"
     readOnly: false
   shm:
-    value: false
+    value: true
     readOnly: false
   configurations:
     # List of labels to be selected, these are the labels from PodDefaults
